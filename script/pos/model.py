@@ -41,19 +41,19 @@ class Transformer(nn.Module):
         self.linear.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, x):
-        print("-----------------")
-        print(x.shape)
+        # print("-----------------")
+        # print(x.shape)
         x = self.embedding(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.pos_encoder(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.encoder(x)
-        print(x.shape)
+        # print(x.shape)
         # x = x.view(x.size(0), -1)
         # print(x.shape)
         x = self.linear(x)
-        print(x.shape)
-        print("-----------------")
+        # print(x.shape)
+        # print("-----------------")
         return x
 
 

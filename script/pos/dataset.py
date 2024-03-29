@@ -22,8 +22,10 @@ class POSDataset(Dataset):
             in vocabs]
         # add padding in label
         # self.labels = [torch.tensor([self.label2idx[label]  for label in a_labels] + ) for a_labels in labels]
-        self.labels = [torch.tensor([self.label2idx[label] for label in a_labels] + [0] * (max_length - len(a_labels)))
-                       for a_labels in labels]
+        self.labels = [torch.tensor(
+            [self.label2idx[label] for label in a_labels][:max_length] + [0] * (
+                    max_length - len(a_labels)))
+            for a_labels in labels]
 
     def __len__(self):
         return len(self.labels)
@@ -75,6 +77,7 @@ def get_data(corpus_path):
 def get_dataloader(corpus_path, max_length=128, batch_size=32):
     from sklearn.model_selection import train_test_split
     vocabs, classes = get_data(corpus_path)
+
     # print(vocabs[0], classes[0])
     train_vocabs, test_vocabs, train_classes, test_classes = train_test_split(vocabs, classes, test_size=0.2)
     train_dataset = POSDataset(train_vocabs, train_classes, max_length)
@@ -85,17 +88,33 @@ def get_dataloader(corpus_path, max_length=128, batch_size=32):
 
 
 if __name__ == '__main__':
-    # get_dataloader("../../data/corpus.txt")
-    tokenizer = AutoTokenizer.from_pretrained("hfl/chinese-bert-wwm-ext")
+    get_dataloader("../../data/corpus.txt")
+    # tokenizer = AutoTokenizer.from_pretrained("hfl/chinese-bert-wwm-ext")
+    # #
+    # # # 输入的句子
+    # sentence_list = ['迈向', '充满', '希望', '的', '新', '世纪', '——', '一九九八年', '新年', '讲话', '（', '附', '图片',
+    #                  '１',
+    #                  '张', '）']
+    # sentence = "".join(sentence_list)
+    # #
+    # tokens = tokenizer(sentence_list, padding=True, truncation=True, return_tensors="pt", is_split_into_words=True,
+    #                    add_special_tokens=False)
+    # print(tokens)
+    # print(len(tokens["input_ids"][0]))
+    # print(len(sentence))
+    # tokens = tokenizer(sentence, padding=False, truncation=True, return_tensors="pt",
+    #                    add_special_tokens=False)
     #
-    # # 输入的句子
-    sentence = ['迈向', '充满', '希望', '的', '新', '世纪', '——', '一九九八年', '新年', '讲话', '（', '附', '图片', '１',
-                '张', '）']
+    # print(tokens)
+    # print(len(tokens["input_ids"][0]))
+    # print(len(sentence))
+    #
+    # for sen in sentence_list:
+    #     tokens = tokenizer(sen, padding=False, truncation=True, return_tensors="pt", add_special_tokens=False)
+    #     print(tokens)
+    #     print(len(tokens["input_ids"][0]), len(sen))
 
-    tokens = tokenizer(sentence, padding="max_length", truncation=True, return_tensors="pt", is_split_into_words=True,
-                       max_length=512)
-    print(tokens)
-    print(help(tokenizer.__call__))
+    # print(help(tokenizer.__call__))
     # n = 0
     # for x, y in dataloader:
     #     n += 1

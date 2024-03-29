@@ -4,5 +4,6 @@
 # @Author : fiv
 
 # 分词标注
-from transformers import AutoTokenizer
-tokenizer = AutoTokenizer.from_pretrained("hfl/chinese-bert-wwm-ext")
+l = [1, 2, 3][:128] + [0] * (128 - 3)
+print(len(l))
+print(l)

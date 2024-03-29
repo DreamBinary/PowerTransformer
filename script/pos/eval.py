@@ -14,7 +14,13 @@ def eval(model, dataloader):
             x = x.cuda()
             y = y.cuda()
             output = model(x)
+            output = output.view(-1, 44)
+            y = y.view(-1)
+            print(output.shape)
             _, predicted = torch.max(output, 1)
+            print(predicted)
+            print(y)
+
             total += y.size(0)
             correct += (predicted == y).sum().item()
             # print(y, predicted)

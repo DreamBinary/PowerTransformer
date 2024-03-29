@@ -6,13 +6,15 @@ import torch
 
 from dataset import get_dataloader
 from env import PATH
+from eval import eval
 from model import Transformer
 from train import train
 
 
 def run(corpus_path):
     torch.cuda.empty_cache()
-    train_dataloader, test_dataloader = get_dataloader(corpus_path, batch_size=1)
+    max_len = 32
+    train_dataloader, test_dataloader = get_dataloader(corpus_path, batch_size=1, max_length=max_len)
     vocab_size = train_dataloader.dataset.vocab_size()
     tag_size = train_dataloader.dataset.tag_size()
 
@@ -21,7 +23,7 @@ def run(corpus_path):
         output_path.unlink()
 
     total_run = 1
-    model = Transformer(vocab_size=vocab_size, pos_tag_size=tag_size)
+    model = Transformer(vocab_size=vocab_size, pos_tag_size=tag_size, max_length=max_len)
     model = model.cuda()
     train(model, train_dataloader, total_run, output_path)
     model.load_state_dict(torch.load(output_path))
@@ -29,7 +31,7 @@ def run(corpus_path):
 
 
 if __name__ == '__main__':
-    corpus_path = "../../data/corpus.txt"
+    corpus_path = "../../data/corpus_demo.txt"
     run(corpus_path)
 
 # from model import Transformer

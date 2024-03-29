@@ -18,7 +18,7 @@ def train(model, dataloader, total_run=10, output_path=PATH.MODEL_PATH / "no_nom
     pbar = tqdm(range(total_run))
     min_loss = 100
     for _ in pbar:
-        loss = 0
+        tot_loss = 0
         for x, y in dataloader:
             x = x.cuda()
             y = y.cuda()
@@ -37,10 +37,10 @@ def train(model, dataloader, total_run=10, output_path=PATH.MODEL_PATH / "no_nom
             optim.zero_grad()
             loss.backward()
             optim.step()
-            loss += loss.item()
-        loss = loss / len(dataloader)
-        pbar.set_description(f"loss: {loss:.4f}")
-        if loss < min_loss:
-            min_loss = loss
+            tot_loss += loss.item()
+        tot_loss = tot_loss / len(dataloader)
+        pbar.set_description(f"loss: {tot_loss:.4f}")
+        if tot_loss < min_loss:
+            min_loss = tot_loss
             torch.save(model.state_dict(), output_path)
     print(f"Min loss: {min_loss}")
