@@ -22,12 +22,12 @@ def run(corpus_path):
     if output_path.exists():
         output_path.unlink()
 
-    total_run = 1
+    total_run = 10
     model = Transformer(vocab_size=vocab_size, pos_tag_size=tag_size, max_length=max_len)
     model = model.cuda()
-    train(model, train_dataloader, total_run, output_path)
+    train(model, tag_size, train_dataloader, total_run, output_path)
     model.load_state_dict(torch.load(output_path))
-    eval(model, test_dataloader)
+    eval(model, tag_size, test_dataloader)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,6 @@
 # @FileName : dataset.py
 # @Time : 2024/3/27 9:16
 # @Author : fiv
-
 import torch
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer
@@ -11,27 +10,31 @@ from transformers import AutoTokenizer
 class POSDataset(Dataset):
 
     def __init__(self, vocabs, labels, max_length):
-        self.states = ['Ag', 'a', 'ad', 'an', 'Bg', 'b', 'c', 'Dg', 'd', 'e', 'f', 'h', 'i', 'j', 'k', 'l', 'Mg', 'm',
-                       'Ng', 'n', 'nr', 'ns', 'nt', 'nx', 'nz', 'o', 'p', 'q', 'Rg', 'r', 's', 'na', 'Tg', 't', 'u',
-                       'Vg', 'v', 'vd', 'vn', 'vvn', 'w', 'Yg', 'y', 'z']
-        self.label2idx = {state: idx + 1 for idx, state in enumerate(self.states)}
+        self.states = ['NONE', 'Ag', 'a', 'ad', 'an', 'Bg', 'b', 'c', 'Dg', 'd', 'e', 'f', 'h', 'i', 'j', 'k', 'l',
+                       'Mg', 'm', 'Ng', 'n', 'nr', 'ns', 'nt', 'nx', 'nz', 'o', 'p', 'q', 'Rg', 'r', 's', 'na', 'Tg',
+                       't', 'u', 'Vg', 'v', 'vd', 'vn', 'vvn', 'w', 'Yg', 'y', 'z']
+        self.label2idx = {state: idx for idx, state in enumerate(self.states)}
         self.tokenizer = AutoTokenizer.from_pretrained("hfl/chinese-bert-wwm-ext", use_fast=True)
-        self.vocab = [
-            self.tokenizer(vocab, padding="max_length", truncation=True, return_tensors="pt", max_length=max_length,
-                           is_split_into_words=True)["input_ids"][0] for vocab
-            in vocabs]
-        # add padding in label
-        # self.labels = [torch.tensor([self.label2idx[label]  for label in a_labels] + ) for a_labels in labels]
-        self.labels = [torch.tensor(
-            [self.label2idx[label] for label in a_labels][:max_length] + [0] * (
-                    max_length - len(a_labels)))
-            for a_labels in labels]
+        self.corpus = [self.token_and_align_labels(vocab, label, max_length) for vocab, label in zip(vocabs, labels)]
+
+    def token_and_align_labels(self, tokens, labels, max_length):
+        tokens = self.tokenizer(tokens, truncation=True, is_split_into_words=True, padding="max_length",
+                                add_special_tokens=False, max_length=max_length)
+        word_ids = tokens.word_ids()
+        aligned_labels = []
+        for wid in word_ids:
+            if wid is None:
+                aligned_labels.append("NONE")
+            else:
+                aligned_labels.append(labels[wid])
+        # return tokens["input_ids"], aligned_labels
+        return torch.tensor(tokens["input_ids"]), torch.tensor([self.label2idx[label] for label in aligned_labels])
 
     def __len__(self):
-        return len(self.labels)
+        return len(self.corpus)
 
     def __getitem__(self, idx):
-        return self.vocab[idx], self.labels[idx]
+        return self.corpus[idx]
 
     def tag_size(self):
         return len(self.states)
@@ -88,17 +91,39 @@ def get_dataloader(corpus_path, max_length=128, batch_size=32):
 
 
 if __name__ == '__main__':
-    get_dataloader("../../data/corpus.txt")
+    # get_dataloader("../../data/corpus.txt")
+    corpus_path = "../../data/corpus_demo.txt"
+    train_dataloader, test_dataloader = get_dataloader(corpus_path, batch_size=1)
+    for x, y in train_dataloader:
+        print(len(x), len(y))
     # tokenizer = AutoTokenizer.from_pretrained("hfl/chinese-bert-wwm-ext")
-    # #
-    # # # 输入的句子
+    # # #
+    # # 迈向/v 充满/v 希望/n 的/u 新/a 世纪/n ——/w 一九九八年/t 新年/t 讲话/n （/w 附/v 图片/n １/m 张/q ）/w
     # sentence_list = ['迈向', '充满', '希望', '的', '新', '世纪', '——', '一九九八年', '新年', '讲话', '（', '附', '图片',
-    #                  '１',
-    #                  '张', '）']
-    # sentence = "".join(sentence_list)
+    #                  '１', '张', '）']
+    # lable_list = ['v', 'v', 'n', 'u', 'a', 'n', 'w', 't', 't', 'n', 'w', 'v', 'n', 'm', 'q', 'w']
     # #
-    # tokens = tokenizer(sentence_list, padding=True, truncation=True, return_tensors="pt", is_split_into_words=True,
-    #                    add_special_tokens=False)
+    # tokens = tokenizer(sentence_list, truncation=True, is_split_into_words=True, padding="max_length",
+    #                    add_special_tokens=False, max_length=128)
+    # word_ids = tokens.word_ids()
+    # print(word_ids)
+    # aligned_labels = []
+    # for id in word_ids:
+    #     if id is None:
+    #         aligned_labels.append(-100)
+    #     else:
+    #         aligned_labels.append(lable_list[id])
+    # print(tokens)
+    # print(aligned_labels)
+    # print(word_ids)
+    #
+    # print(len(word_ids))
+    # print(len(lable_list))
+    #
+    # print(len(tokens["input_ids"]))
+    # print(len(sentence_list))
+    # print(len(aligned_labels))
+
     # print(tokens)
     # print(len(tokens["input_ids"][0]))
     # print(len(sentence))

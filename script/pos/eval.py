@@ -5,7 +5,7 @@
 import torch
 
 
-def eval(model, dataloader):
+def eval(model, pos_tag_size, dataloader):
     model.eval()
     total = 0
     correct = 0
@@ -14,9 +14,9 @@ def eval(model, dataloader):
             x = x.cuda()
             y = y.cuda()
             output = model(x)
-            output = output.view(-1, 44)
+            output = output.view(-1, pos_tag_size)
             y = y.view(-1)
-            print(output.shape)
+            # print(output.shape)
             _, predicted = torch.max(output, 1)
             print(predicted)
             print(y)

@@ -10,7 +10,7 @@ from env import PATH
 
 
 #
-def train(model, dataloader, total_run=10, output_path=PATH.MODEL_PATH / "no_nome.pth"):
+def train(model, pos_tag_size, dataloader, total_run=10, output_path=PATH.MODEL_PATH / "no_nome.pth"):
     model = model.cuda()
     criterion = nn.CrossEntropyLoss()
     optim = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -27,7 +27,7 @@ def train(model, dataloader, total_run=10, output_path=PATH.MODEL_PATH / "no_nom
             # print(y.shape)
             # print(output)
             # print(y)
-            output = output.view(-1, 44)
+            output = output.view(-1, pos_tag_size)
             y = y.view(-1)
             # print(output.shape)
             # print(y.shape)
